@@ -70,12 +70,20 @@ Here the project_slug is `my-package`, when you generate yours, it could be anot
 
 Also notice there's `pyproject.toml` in this folder. This is the main configuration file of our project.
 
-## Step 3: Install Poetry
+## Step 3a: Install Poetry
 
 In this step we will install Poetry if you are not using it, since the whole project is managed by it.
 Poetry provides a [custom installer](https://python-poetry.org/docs/#installation) that will install
 poetry isolated from the rest of your system by vendorizing its dependencies.
 This is the recommended way of installing poetry.
+
+## Step 3b: Instal tox
+
+We also need to install tox outside of the poetry virtualenv in order to robustly run tests during development:
+
+``` bash
+pip install tox
+```
 
 ## Step 4: Install Dev Requirements
 
@@ -86,14 +94,14 @@ Install the new project's local development requirements with `poetry install`:
 
 ``` bash
 poetry install -E doc -E dev -E test
-poetry run tox
+tox
 ```
 
 Poetry will create its own virtualenv isolated from your system and install the dependencies in it.
 We installed extra dependencies needed by the developer with `-E {group}` options, such as documentation build tools, lint,
 formatting and test tools etc.
 
-We also launch a smoke test here by running `poetry run tox`. This will run `tox` within a created virtual environment,
+We also launch a smoke test here by running `tox`. This will run `tox` within a created virtual environment,
 give you a test report and lint report. You should see no errors except some lint warnings.
 
 You can also activate the virtual environment manually with `poetry shell`, this will create a new shell.
