@@ -23,7 +23,7 @@
 ## Installation
 {%- if is_open_source %}
 
-Using a python environment running python >= 3.7:
+Using a python environment running python >= 3.8:
 
 ```shell
 $ pip install {{ cookiecutter.project_slug }}
