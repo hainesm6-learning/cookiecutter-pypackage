@@ -70,12 +70,20 @@ Here the project_slug is `my-package`, when you generate yours, it could be anot
 
 Also notice there's `pyproject.toml` in this folder. This is the main configuration file of our project.
 
-## Step 3: Install Poetry
+## Step 3a: Install Poetry
 
 In this step we will install Poetry if you are not using it, since the whole project is managed by it.
 Poetry provides a [custom installer](https://python-poetry.org/docs/#installation) that will install
 poetry isolated from the rest of your system by vendorizing its dependencies.
 This is the recommended way of installing poetry.
+
+## Step 3b: Instal tox
+
+We also need to install tox outside of the poetry env in order to robustly run tests during development:
+
+``` bash
+pip install tox
+```
 
 ## Step 4: Install Dev Requirements
 
@@ -85,26 +93,17 @@ You should still be in the folder named as `project_slug`, which contains the
 Install the new project's local development requirements with `poetry install`:
 
 ``` bash
-poetry install -E doc -E dev -E test
-poetry run tox
+poetry install -v
+tox
 ```
 
 Poetry will create its own virtualenv isolated from your system and install the dependencies in it.
-We installed extra dependencies needed by the developer with `-E {group}` options, such as documentation build tools, lint,
-formatting and test tools etc.
+We installed extra development dependencies by not specifying the `--no-dev` flag.
 
-We also launch a smoke test here by running `poetry run tox`. This will run `tox` within a created virtual environment,
+We also launch a smoke test here by running `tox`. This will run `tox` within a created virtual environment,
 give you a test report and lint report. You should see no errors except some lint warnings.
 
 You can also activate the virtual environment manually with `poetry shell`, this will create a new shell.
-
-??? Tips
-
-    Extra dependencies are grouped into three groups, doc, dev and test for better
-    granularity. When you ship the package, dependencies in group doc, dev and test
-    might not be shipped.
-
-    As the developer, you will need install all the dependencies.
 
 ??? Tips
 
@@ -112,10 +111,11 @@ You can also activate the virtual environment manually with `poetry shell`, this
     ```
     ERROR: InterpreterNotFound: python3.9
     ```
-    don't be panic, this is just because python3.x is not found on your machine. If you
+    don't panic, this is just because python3.x is not found on your machine. If you
     decide to support that version of Python in your package, please install it on your
     machine. Otherwise, remove it from tox.ini and pyproject.toml (search python3.x then
-    remove it).
+    remove it). It might also be that poetry isn't configured for the correct environment/s.
+    If this is the case, you can remove and add environments with [poetry env](https://python-poetry.org/docs/managing-environments/)
 
 ## Step 5: Create a GitHub Repo
 
