@@ -1,6 +1,4 @@
-# This is a basic workflow to help you get started with Actions
-
-name: dev
+name: pull-request
 
 # Controls when the action will run.
 on:
@@ -11,33 +9,57 @@ on:
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "test"
-  test:
-    # The type of runner that the job will run on
-    strategy:
-      matrix:
-        python-versions: ['3.8', '3.9', '3.10']
-        os: [ubuntu-latest, macos-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
+  linting:
+    runs-on: ubuntu-latest
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
+      - run: |
+          python -m pip install -U pip
+          python -m pip install black flake8 isort
+          flake8 {{ cookiecutter.project_slug }} tests
+          black {{ cookiecutter.project_slug }} tests
+          isort {{ cookiecutter.project_slug }}
+
+  test:
+    needs: linting
+    strategy:
+      fail-fast: true
+      matrix:
+        python-versions: ['3.8', '3.9', '3.10']
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ '{{' }} matrix.os {{ '}}' }}
+
+    steps:
+      - uses: actions/checkout@v2
+      # `id` is Needed to provided a reference to the relavant poetry cache below in `Load cached venv`
+      - name: Set up python ${{ '{{' }} matrix.python-version {{ '}}' }}
+        id: setup-python
+        uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-versions }}
+          python-version: ${{ '{{' }} matrix.python-versions {{ '}}' }}
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install poetry tox tox-gh-actions
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
-      # Note tox will format, lint and build according to the setup.cfg file.    
-      - name: test with tox
-        run: tox
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ '{{' }} runner.os {{ '}}' }}-${{ '{{' }} steps.setup-python.outputs.python-version {{ '}}' }}-${{ '{{' }} hashFiles('**/poetry.lock') {{ '}}' }}
 
-      - name: list files
-        run: ls -l .
+      - name: Install deps
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
+      # Install the root project each time
+      - run: poetry install --no-interaction
+
+      - run: |
+          source .venv/bin/activate
+          pytest --cov={{ cookiecutter.project_slug }} --cov-branch

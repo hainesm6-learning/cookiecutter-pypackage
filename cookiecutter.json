@@ -12,5 +12,5 @@
   "docstrings_style": ["google", "numpy", "pep257"],
   "use_mypy": "y",
   "install_precommit_hooks": "y",
-  "_copy_without_render": ["docs/contributing.md", "docs/index.md", ".github/workflows/*.yml"]
+  "_copy_without_render": ["docs/contributing.md", "docs/index.md"]
 }

@@ -1,4 +1,5 @@
-name: publish
+{% set is_open_source = cookiecutter.open_source_license != 'Not open source' -%}
+name: release
 
 # Controls when the action will run.
 on:
@@ -52,6 +53,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          password: ${{ '{{' }} secrets.PYPI_API_TOKEN {{ '}}' }}
           skip_existing: true
 {% endif -%}
